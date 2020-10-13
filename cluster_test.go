@@ -152,7 +152,6 @@ func TestCluster_AllClusters(t *testing.T) {
 	//fmt.Printf("getting points %v \n",string(resultJSON))
 
 	assert.Equal(t, 100, len(result))
-
 }
 func Test_MercatorProjection(t *testing.T) {
 	coor := GeoCoordinates{

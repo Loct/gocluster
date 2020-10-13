@@ -29,7 +29,7 @@ type ClusterPoint struct {
 	zoom int
 	Id int //Index for pint, Id for cluster
 	NumPoints int
-	//IncludedPoints []int TODO: Implement inclusion of objects
+	IncludedPoints []interface{}
 }
 
 
@@ -279,6 +279,7 @@ func (c *Cluster)clusterize(points []*ClusterPoint, zoom int) []*ClusterPoint {
 		wx := p.X * float64(nPoints)
 		wy := p.Y * float64(nPoints)
 
+		includedPoints := p.IncludedPoints
 		var foundNeighbours []*ClusterPoint
 
 		for j := range neighbourIds {
@@ -289,6 +290,7 @@ func (c *Cluster)clusterize(points []*ClusterPoint, zoom int) []*ClusterPoint {
 				wx += b.X * float64(b.NumPoints)
 				wy += b.Y * float64(b.NumPoints)
 				nPoints += b.NumPoints
+				includedPoints = append(includedPoints, b.IncludedPoints...)
 				b.zoom = zoom //set the zoom to skip in other iterations
 				foundNeighbours = append(foundNeighbours, b)
 			}
@@ -303,6 +305,7 @@ func (c *Cluster)clusterize(points []*ClusterPoint, zoom int) []*ClusterPoint {
 			newCluster.NumPoints = nPoints
 			newCluster.zoom = InfinityZoomLevel
 			newCluster.Id = c.clusterIDLast
+			newCluster.IncludedPoints = includedPoints
 			c.clusterIDLast += 1
 		}
 		result = append(result, newCluster)
@@ -326,7 +329,11 @@ func (c *Cluster)limitZoom(zoom int) int {
 func translateGeoPointsToClusterPoints(points []GeoPoint) []*ClusterPoint {
 	var result = make([]*ClusterPoint, len(points))
 	for i, p := range points {
-		cp := ClusterPoint{}
+		cp := ClusterPoint{
+			IncludedPoints: []interface{}{
+				p,
+			},
+		}
 		cp.zoom = InfinityZoomLevel
 		cp.X, cp.Y = MercatorProjection(p.GetCoordinates())
 		result[i] = &cp
