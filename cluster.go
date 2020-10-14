@@ -86,7 +86,7 @@ func (c *Cluster) ClusterPoints(points []GeoPoint) error {
 	if c.MaxZoom > 21 { c.MaxZoom = 21 }
 
 	//adding extra layer for infinite zoom (initial) layers data storage
-	c.Indexes = make([]*kdbush.KDBush, c.MaxZoom-c.MinZoom+1)
+	c.Indexes = make([]*kdbush.KDBush, c.MaxZoom-c.MinZoom+2)
 	c.Points = points
 
 	//get digits number, start from next exponent
@@ -98,7 +98,7 @@ func (c *Cluster) ClusterPoints(points []GeoPoint) error {
 
 	clusters := translateGeoPointsToClusterPoints(points)
 
-	for z := c.MaxZoom - 1; z >= c.MinZoom; z-- {
+	for z := c.MaxZoom; z >= c.MinZoom; z-- {
 
 		//create index from clusters from previous iteration
 		c.Indexes[z+1] = kdbush.NewBush(clustersToPoints(clusters), c.NodeSize)
@@ -314,7 +314,7 @@ func (c *Cluster)clusterize(points []*ClusterPoint, zoom int) []*ClusterPoint {
 }
 
 func (c *Cluster)limitZoom(zoom int) int {
-	if zoom > c.MaxZoom { zoom = c.MaxZoom }
+	if zoom > c.MaxZoom+1 { zoom = c.MaxZoom+1 }
 	if zoom < c.MinZoom   { zoom = c.MinZoom }
 	return zoom
 }
